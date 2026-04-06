@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Reclamos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --navy:        #1e3a5f;
+      --navy-dark:   #152d4a;
+      --accent:      #e85d26;
+      --accent-lt:   #fff0eb;
+      --bg:          #f0f2f5;
+      --card:        #ffffff;
+      --text:        #1a2332;
+      --muted:       #64748b;
+      --border:      #e2e8f0;
+      --success:     #059669;
+      --radius:      10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Figtree', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── HEADER ──────────────────────────────────────── */
+    .header {
+      background: var(--navy);
+      color: white;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(0,0,0,.25);
+    }
+    .logo {
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-dot {
+      width: 9px; height: 9px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .logo span { color: var(--accent); }
+
+
+
+    /* ─── SCREENS ─────────────────────────────────────── */
+    .screen { display: none; }
+
+
+
+    /* ─── FORM SCREEN ─────────────────────────────────── */
+    #formScreen {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 40px 24px 100px;
+    }
+    .page-title {
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 32px; font-weight: 700;
+      color: var(--navy); margin-bottom: 4px;
+    }
+    .page-sub { color: var(--muted); font-size: 15px; margin-bottom: 32px; }
+
+    /* progress */
+    .progress-wrap { margin-bottom: 32px; }
+    .progress-label {
+      font-size: 12px; color: var(--muted); margin-bottom: 6px;
+      display: flex; justify-content: space-between;
+    }
+    .progress-bar {
+      height: 4px; background: var(--border);
+      border-radius: 4px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: var(--accent); border-radius: 4px;
+      transition: width .4s ease; width: 0%;
+    }
+
+    /* sections */
+    .form-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      margin-bottom: 18px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .sec-header {
+      background: var(--navy);
+      padding: 15px 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sec-num {
+      width: 26px; height: 26px;
+      background: var(--accent); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 14px; font-weight: 700; color: white;
+      flex-shrink: 0;
+    }
+    .sec-title {
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 15px; font-weight: 600; color: white;
+      letter-spacing: .6px; text-transform: uppercase;
+    }
+    .sec-body { padding: 26px 24px; }
+
+    /* grid */
+    .grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; }
+    .grid-3 { grid-template-columns: repeat(3,1fr); }
+    .span2 { grid-column: span 2; }
+    .span3 { grid-column: span 3; }
+    .spanfull { grid-column: 1/-1; }
+
+    /* fields */
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    label {
+      font-size: 11.5px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .req { color: var(--accent); margin-left: 2px; }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%; padding: 10px 13px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-family: 'Figtree', sans-serif; font-size: 14px;
+      color: var(--text); background: #fafbfc;
+      transition: border-color .2s, background .2s; outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--navy); background: white;
+    }
+    textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+    select {
+      cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2364748b' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 13px center;
+      padding-right: 34px;
+    }
+
+    /* photo zone */
+    .photo-drop {
+      border: 2px dashed var(--border); border-radius: 10px;
+      padding: 36px 20px; text-align: center; cursor: pointer;
+      transition: all .2s; background: #fafbfc;
+      user-select: none;
+    }
+    .photo-drop:hover, .photo-drop.over {
+      border-color: var(--accent); background: var(--accent-lt);
+    }
+    .photo-drop-ico { font-size: 38px; margin-bottom: 10px; }
+    .photo-drop-txt { font-size: 15px; color: var(--muted); margin-bottom: 4px; }
+    .photo-drop-txt strong { color: var(--accent); }
+    .photo-drop-hint { font-size: 12px; color: var(--muted); }
+    #photoInput { display: none; }
+
+    .previews {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr));
+      gap: 10px; margin-top: 14px;
+    }
+    .thumb {
+      position: relative; border-radius: 8px; overflow: hidden;
+      aspect-ratio: 1; background: #eef; border: 1.5px solid var(--border);
+    }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb-name {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,.55); color: white;
+      font-size: 10px; padding: 3px 5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .thumb-rm {
+      position: absolute; top: 4px; right: 4px;
+      width: 20px; height: 20px;
+      background: rgba(0,0,0,.7); color: white;
+      border: none; border-radius: 50%; cursor: pointer;
+      font-size: 13px; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* submit */
+    .submit-row {
+      margin-top: 30px; display: flex;
+      justify-content: flex-end; gap: 12px;
+    }
+    .btn-clear {
+      background: transparent; color: var(--muted);
+      border: 1.5px solid var(--border); padding: 14px 22px;
+      border-radius: 10px; font-family: 'Figtree', sans-serif;
+      font-size: 15px; cursor: pointer; transition: all .2s;
+    }
+    .btn-clear:hover { border-color: var(--muted); color: var(--text); }
+    .btn-save {
+      background: var(--accent); color: white; border: none;
+      padding: 14px 36px; border-radius: 10px;
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 18px; font-weight: 600; letter-spacing: .5px;
+      cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .btn-save:hover:not(:disabled) {
+      background: #cc4d1a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 18px rgba(232,93,38,.35);
+    }
+    .btn-save:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* ─── SUCCESS SCREEN ──────────────────────────────── */
+    #successScreen {
+      display: flex;
+      align-items: center; justify-content: center;
+      min-height: calc(100vh - 64px); padding: 40px 20px;
+    }
+    .ok-card {
+      background: white; border-radius: 16px;
+      padding: 56px 48px; max-width: 480px; width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    }
+    .ok-icon {
+      width: 82px; height: 82px; background: #ecfdf5;
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 24px; font-size: 38px;
+    }
+    .ok-title {
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 30px; font-weight: 700; color: var(--navy); margin-bottom: 10px;
+    }
+    .ok-msg { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 28px; }
+    .drive-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #ecfdf5; color: var(--success);
+      text-decoration: none; padding: 12px 20px;
+      border-radius: 8px; font-weight: 600; font-size: 14px;
+      margin-bottom: 20px; transition: background .2s;
+    }
+    .drive-link:hover { background: #d1fae5; }
+    .btn-new {
+      display: block; width: 100%; padding: 15px;
+      background: var(--navy); color: white; border: none;
+      border-radius: 10px;
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 18px; font-weight: 600;
+      cursor: pointer; transition: background .2s; margin-top: 10px;
+    }
+    .btn-new:hover { background: var(--navy-dark); }
+
+    /* ─── LOADING ─────────────────────────────────────── */
+    .loading-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,.65);
+      display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px; z-index: 1000;
+    }
+    .loading-overlay.on { display: flex; }
+    .spinner {
+      width: 50px; height: 50px;
+      border: 4px solid rgba(255,255,255,.2);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-txt { color: white; font-size: 15px; }
+
+    /* ─── TOAST ───────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--text); color: white;
+      padding: 13px 18px; border-radius: 10px;
+      font-size: 14px; max-width: 360px;
+      transform: translateY(80px); opacity: 0;
+      transition: all .3s; z-index: 2000;
+    }
+    .toast.on  { transform: translateY(0); opacity: 1; }
+    .toast.err { background: #ef4444; }
+    .toast.ok  { background: var(--success); }
+
+    /* ─── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 640px) {
+      .grid, .grid-3 { grid-template-columns: 1fr; }
+      .span2, .span3 { grid-column: span 1; }
+      #formScreen { padding: 24px 14px 80px; }
+      .login-card, .ok-card { padding: 40px 22px; }
+      .header { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════ -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    GESTIÓN DE <span>RECLAMOS</span>
+  </div>
+
+</header>
+
+<!-- ═══ LOADING ══════════════════════════════════════════ -->
+<div class="loading-overlay" id="loader">
+  <div class="spinner"></div>
+  <div class="loading-txt" id="loaderTxt">Guardando reclamo...</div>
+</div>
+
+<!-- ═══ TOAST ════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ FORM SCREEN ═══════════════════════════════════════ -->
+<div id="formScreen" class="screen">
+  <div style="max-width:880px;margin:0 auto;padding:40px 24px 100px">
+    <h1 class="page-title">Nuevo Reclamo</h1>
+    <p class="page-sub">Completá los campos y adjuntá las fotos. Las imágenes se guardan automáticamente en Google Drive.</p>
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Campos obligatorios completados</span>
+        <span id="progPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+    </div>
+
+    <form id="reclamoForm" onsubmit="handleSubmit(event)" novalidate>
+
+      <!-- ── 1. IDENTIFICACIÓN ───────────────────────── -->
+      <div class="form-section">
+        <div class="sec-header">
+          <div class="sec-num">1</div>
+          <div class="sec-title">Identificación del Reclamo</div>
+        </div>
+        <div class="sec-body">
+          <div class="grid">
+            <div class="field">
+              <label>Fecha del Reclamo <span class="req">*</span></label>
+              <input type="date" id="fechaReclamo" required>
+            </div>
+            <div class="field">
+              <label>Estado del Reclamo</label>
+              <select id="estadoReclamo">
+                <option value="Abierto">Abierto</option>
+                <option value="En proceso">En proceso</option>
+                <option value="Cerrado">Cerrado</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Agente de Cuenta <span class="req">*</span></label>
+              <input type="text" id="agenteCuenta" required placeholder="Nombre del agente">
+            </div>
+            <div class="field">
+              <label>Cliente <span class="req">*</span></label>
+              <input type="text" id="cliente" required placeholder="Nombre del cliente">
+            </div>
+            <div class="field">
+              <label>Vendedor</label>
+              <input type="text" id="vendedor" placeholder="Nombre del vendedor">
+            </div>
+            <div class="field">
+              <label>Unidad de Negocio</label>
+              <input type="text" id="unidadNegocio" placeholder="Ej: Textil, Packaging…">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 2. PRODUCTO ────────────────────────────── -->
+      <div class="form-section">
+        <div class="sec-header">
+          <div class="sec-num">2</div>
+          <div class="sec-title">Datos del Producto</div>
+        </div>
+        <div class="sec-body">
+          <div class="grid">
+            <div class="field span2">
+              <label>Artículo <span class="req">*</span></label>
+              <input type="text" id="articulo" required placeholder="Nombre o código del artículo">
+            </div>
+            <div class="field">
+              <label>Color / Variante / Print</label>
+              <input type="text" id="colorVariante" placeholder="Ej: Rojo, Floral…">
+            </div>
+            <div class="field">
+              <label>Cantidad Reclamada (Metros / KG)</label>
+              <input type="number" id="cantidadRec" step="any" min="0" placeholder="0">
+            </div>
+            <div class="field">
+              <label>Unidad</label>
+              <select id="unidad">
+                <option value="">Seleccionar…</option>
+                <option>Rollos</option>
+                <option>Cajas</option>
+                <option>Metros</option>
+                <option>KG</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Etiqueta</label>
+              <input type="text" id="etiqueta" placeholder="Nro. de etiqueta">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3. REFERENCIAS ─────────────────────────── -->
+      <div class="form-section">
+        <div class="sec-header">
+          <div class="sec-num">3</div>
+          <div class="sec-title">Referencias y Documentación</div>
+        </div>
+        <div class="sec-body">
+          <div class="grid grid-3">
+            <div class="field">
+              <label>Nro de Orden</label>
+              <input type="text" id="nroOrden" placeholder="Nro. de orden">
+            </div>
+            <div class="field">
+              <label>Nro de Lote</label>
+              <input type="text" id="nroLote" placeholder="Nro. de lote">
+            </div>
+            <div class="field">
+              <label>N° Pedido</label>
+              <input type="text" id="nroPedido" placeholder="Nro. de pedido">
+            </div>
+            <div class="field">
+              <label>Material</label>
+              <select id="material">
+                <option value="">Seleccionar…</option>
+                <option value="Físico">Físico</option>
+                <option value="Digital">Digital</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 4. DETALLE ─────────────────────────────── -->
+      <div class="form-section">
+        <div class="sec-header">
+          <div class="sec-num">4</div>
+          <div class="sec-title">Detalle del Reclamo</div>
+        </div>
+        <div class="sec-body">
+          <div class="grid">
+            <div class="field span2">
+              <label>Clasificación del Reclamo <span class="req">*</span></label>
+              <select id="clasificacion" required onchange="toggleSubClasif()">
+                <option value="">Seleccionar clasificación…</option>
+                <option value="A — Pedido mal armado / romaneado">A — Pedido mal armado / romaneado</option>
+                <option value="B — Rollos sucios (embalaje)">B — Rollos sucios (embalaje)</option>
+                <option value="C — Mercadería fallada">C — Mercadería fallada</option>
+                <option value="D — No cumple expectativa del cliente">D — No cumple expectativa del cliente</option>
+                <option value="E — Error de facturación / CC">E — Error de facturación / CC</option>
+                <option value="F — Incumplimiento de entrega">F — Incumplimiento de entrega</option>
+                <option value="G — Motivo comercial / deuda">G — Motivo comercial / deuda</option>
+                <option value="H — Error en carga de pedido">H — Error en carga de pedido</option>
+                <option value="I — Entrega cruzada">I — Entrega cruzada</option>
+              </select>
+            </div>
+            <div class="field span2" id="subClasifWrap" style="display:none">
+              <label>Tipo de error en carga de pedido <span class="req">*</span></label>
+              <select id="subClasif">
+                <option value="">Seleccionar…</option>
+                <option value="Error del vendedor">Error del vendedor</option>
+                <option value="Cliente pasó mal el pedido">Cliente pasó mal el pedido</option>
+                <option value="Error en las cantidades">Error en las cantidades</option>
+              </select>
+            </div>
+            <div class="field span2">
+              <label>Descripción del Motivo del Reclamo <span class="req">*</span></label>
+              <textarea id="descripcionMotivo" required
+                placeholder="Describí en detalle el motivo del reclamo…"></textarea>
+            </div>
+            <div class="field">
+              <label>Acción de Contingencia</label>
+              <textarea id="accionConting"
+                placeholder="Describí la acción tomada…"></textarea>
+            </div>
+            <div class="field">
+              <label>Orden de Retiro</label>
+              <input type="text" id="ordenRetiro" placeholder="Nro. de orden de retiro">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 5. FOTOS ───────────────────────────────── -->
+      <div class="form-section">
+        <div class="sec-header">
+          <div class="sec-num">5</div>
+          <div class="sec-title">Fotografías del Reclamo</div>
+        </div>
+        <div class="sec-body">
+          <div class="photo-drop" id="photoDrop"
+               onclick="document.getElementById('photoInput').click()">
+            <div class="photo-drop-ico">📷</div>
+            <div class="photo-drop-txt"><strong>Hacé clic o arrastrá</strong> las fotos acá</div>
+            <div class="photo-drop-hint">JPG · PNG · HEIC · Máx. 10 fotos · 5 MB por imagen</div>
+          </div>
+          <input type="file" id="photoInput" multiple accept="image/*">
+          <div id="photoCount" style="font-size:12px;color:var(--muted);margin-top:8px;display:none">
+            <span id="photoCountNum">0</span> foto(s) adjunta(s) · máx. 10
+          </div>
+          <div class="previews" id="previews"></div>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="submit-row">
+        <button type="button" class="btn-clear" onclick="resetForm()">Limpiar formulario</button>
+        <button type="submit" class="btn-save" id="submitBtn">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/>
+          </svg>
+          Guardar Reclamo
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS SCREEN ═══════════════════════════════════ -->
+<div id="successScreen" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;
+              min-height:calc(100vh - 64px);padding:40px 20px">
+    <div class="ok-card">
+      <div class="ok-icon">✅</div>
+      <h2 class="ok-title">¡Reclamo guardado!</h2>
+      <p class="ok-msg" id="okMsg">El reclamo fue registrado correctamente.</p>
+      <br>
+      <a href="#" id="driveFolderLink" class="drive-link" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        Ver carpeta en Drive
+      </a>
+      <button class="btn-new" onclick="newReclamo()">+ Nuevo Reclamo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║  ⚙️  CONFIGURACIÓN                                       ║
+// ╚══════════════════════════════════════════════════════════╝
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuQauixbI3ql7Pk2HcPPKJnRZV81PK3_OKhGw7bazKsgCexYSXkS1ZFWgKdufNtSw7dg/exec';
+
+const MAX_FOTOS   = 10;          // máximo número de fotos
+const MAX_MB      = 5;           // máximo MB por foto
+const MAX_BYTES   = MAX_MB * 1024 * 1024;
+
+// ─── SUBCLASIFICACIÓN (solo para H) ────────────────────────
+function toggleSubClasif() {
+  const val  = document.getElementById('clasificacion').value;
+  const wrap = document.getElementById('subClasifWrap');
+  const sel  = document.getElementById('subClasif');
+  const esH  = val.startsWith('H');
+  wrap.style.display = esH ? 'block' : 'none';
+  sel.required = esH;
+  if (!esH) sel.value = '';
+}
+
+// ─── INIT ──────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  document.getElementById('fechaReclamo').value = new Date().toISOString().split('T')[0];
+  showScreen('formScreen');
+  initPhotos();
+  initProgress();
+});
+
+// ─── SCREENS ───────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+}
+
+// ─── PROGRESS BAR ──────────────────────────────────────────
+function initProgress() {
+  const fields = [...document.querySelectorAll('#reclamoForm [required]')];
+  const update = () => {
+    const done = fields.filter(f => f.value.trim()).length;
+    const pct  = Math.round(done / fields.length * 100);
+    document.getElementById('progFill').style.width = pct + '%';
+    document.getElementById('progPct').textContent  = pct + '%';
+  };
+  fields.forEach(f => f.addEventListener('input', update));
+}
+
+// ─── FOTO UPLOAD ───────────────────────────────────────────
+let files = [];
+
+function initPhotos() {
+  const drop  = document.getElementById('photoDrop');
+  const input = document.getElementById('photoInput');
+  input.addEventListener('change', e => addFiles(e.target.files));
+  drop.addEventListener('dragover',  e => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', ()  => drop.classList.remove('over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('over');
+    addFiles(e.dataTransfer.files);
+  });
+}
+
+function addFiles(list) {
+  const container = document.getElementById('previews');
+  const activos   = files.filter(Boolean).length;
+  let   rechazadas = [];
+
+  [...list].forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+
+    // Validar tamaño
+    if (file.size > MAX_BYTES) {
+      rechazadas.push(`"${file.name}" supera los ${MAX_MB} MB`);
+      return;
+    }
+
+    // Validar cantidad
+    if (files.filter(Boolean).length >= MAX_FOTOS) {
+      rechazadas.push(`Límite de ${MAX_FOTOS} fotos alcanzado — "${file.name}" no se agregó`);
+      return;
+    }
+
+    const idx = files.length;
+    files.push(file);
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const div = document.createElement('div');
+      div.className = 'thumb'; div.dataset.idx = idx;
+      div.innerHTML = `
+        <img src="${ev.target.result}" alt="${file.name}">
+        <div class="thumb-name">${file.name}</div>
+        <button type="button" class="thumb-rm" onclick="removeFile(${idx})">×</button>`;
+      container.appendChild(div);
+      updatePhotoCount();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  if (rechazadas.length) {
+    toast(rechazadas.join('\n'), 'err');
+  }
+}
+
+function updatePhotoCount() {
+  const n    = files.filter(Boolean).length;
+  const wrap = document.getElementById('photoCount');
+  document.getElementById('photoCountNum').textContent = n;
+  wrap.style.display = n > 0 ? 'block' : 'none';
+}
+
+function removeFile(idx) {
+  files[idx] = null;
+  document.querySelector(`.thumb[data-idx="${idx}"]`)?.remove();
+  updatePhotoCount();
+}
+
+// Convierte File a base64 sin el prefijo data:...
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Error leyendo imagen'));
+    r.readAsDataURL(file);
+  });
+}
+
+// ─── SUBMIT ────────────────────────────────────────────────
+async function handleSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+
+  const g = id => document.getElementById(id).value.trim();
+
+  const datos = {
+    fechaReclamo:    g('fechaReclamo'),
+    agenteCuenta:    g('agenteCuenta'),
+    cliente:         g('cliente'),
+    vendedor:        g('vendedor'),
+    unidadNegocio:   g('unidadNegocio'),
+    articulo:        g('articulo'),
+    colorVariante:   g('colorVariante'),
+    cantidadRec:     g('cantidadRec'),
+    unidad:          g('unidad'),
+    etiqueta:        g('etiqueta'),
+    nroOrden:        g('nroOrden'),
+    nroLote:         g('nroLote'),
+    nroPedido:       g('nroPedido'),
+    material:        g('material'),
+    clasificacion:   g('clasificacion'),
+    subClasificacion: g('subClasif'),
+    descripcionMotivo: g('descripcionMotivo'),
+    accionConting:   g('accionConting'),
+    ordenRetiro:     g('ordenRetiro'),
+    estadoReclamo:   g('estadoReclamo'),
+  };
+
+  // Validación
+  if (!datos.fechaReclamo || !datos.agenteCuenta || !datos.cliente ||
+      !datos.articulo || !datos.clasificacion || !datos.descripcionMotivo) {
+    toast('Por favor completá todos los campos obligatorios (*).', 'err');
+    btn.disabled = false; return;
+  }
+
+  try {
+    // Convertir fotos a base64 con progreso real
+    const photoList = files.filter(Boolean);
+    const fotos = [];
+
+    for (let i = 0; i < photoList.length; i++) {
+      loader(`Preparando imagen ${i + 1} de ${photoList.length}…`);
+      const f = photoList[i];
+      fotos.push({ nombre: f.name, tipo: f.type, datos: await toBase64(f) });
+    }
+
+    loader(`Enviando reclamo${fotos.length ? ` con ${fotos.length} foto(s)` : ''}… (puede demorar unos segundos)`);
+
+    const resp = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ datos, fotos }),
+    });
+
+    const result = await resp.json();
+    if (!result.ok) throw new Error(result.error || 'Error desconocido');
+
+    hideLoader();
+    document.getElementById('driveFolderLink').href = result.folderUrl;
+    document.getElementById('okMsg').textContent =
+      `El reclamo de "${datos.cliente}" fue registrado correctamente.` +
+      (fotos.length ? ` Se subieron ${fotos.length} foto${fotos.length > 1 ? 's' : ''} a Drive.` : '');
+    showScreen('successScreen');
+
+  } catch (err) {
+    hideLoader();
+    console.error(err);
+    toast('Error al guardar: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─── RESET ─────────────────────────────────────────────────
+function resetForm() {
+  document.getElementById('reclamoForm').reset();
+  document.getElementById('fechaReclamo').value = new Date().toISOString().split('T')[0];
+  files = [];
+  document.getElementById('previews').innerHTML = '';
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('progPct').textContent  = '0%';
+  document.getElementById('photoCount').style.display = 'none';
+}
+function newReclamo() { resetForm(); showScreen('formScreen'); }
+
+// ─── UI HELPERS ────────────────────────────────────────────
+function loader(msg) {
+  document.getElementById('loaderTxt').textContent = msg;
+  document.getElementById('loader').classList.add('on');
+}
+function hideLoader() { document.getElementById('loader').classList.remove('on'); }
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast on ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('on'), 4500);
+}
+</script>
+</body>
+</html>
