@@ -560,7 +560,7 @@
 </div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDnZgVQtbFH2ETNK9pIpkVmAAouGBrmKvcGdfzIchC3_krWT9ps2PJm9f2r86CgbYm/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgObxXoOe9Uo-I50Fse7M5nV4eT6QDTDm--SZQjwN08FvsUaqRApcuFPVN_XHkcd4e/exec';
 
 const MAX_FOTOS = 10;
 const MAX_MB    = 5;
@@ -897,11 +897,7 @@ function renderReclamosResp() {
     // ¿Tiene ADF guardado? → primero en memoria, si no, del backend
     const adfData = getADF(r.nroReclamo) || (r.adfMotivos ? { motivos: r.adfMotivos } : null);
 
-    const infoResolucion = resuelto ? `
-      <div class="resuelto-info">
-        ✅ Resuelto el <strong>${formatFecha(r.fechaFin)}</strong> como <strong>${r.estado}</strong>
-        ${r.comentario ? `<br>💬 <em>${r.comentario}</em>` : ''}
-      </div>` : '';
+    const infoResolucion = '';
 
     const botonADF = adfData
       ? `<span class="adf-badge">✔ ADF completado</span>`
@@ -940,7 +936,7 @@ function renderReclamosResp() {
         <div class="reclamo-cliente">${r.cliente}</div>
         <div class="reclamo-clasif">${r.clasificacion}</div>
         <div><span class="badge ${badgeClass}">${r.estado}</span></div>
-        <div class="reclamo-fecha">${formatFecha(r.fechaIngreso)}</div>
+        <div class="reclamo-fecha">${formatFecha(resuelto && r.fechaFin ? r.fechaFin : r.fechaIngreso)}</div>
         <div class="reclamo-chevron" id="chev-${r.nroReclamo}">▾</div>
       </div>
       <div class="reclamo-card-body" id="body-${r.nroReclamo}">
