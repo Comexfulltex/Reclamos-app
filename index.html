@@ -207,7 +207,19 @@
     .btn-adf:hover { background: var(--accent); }
     .btn-adf.completado { background: #059669; cursor: default; }
     .btn-adf.completado:hover { background: #047857; }
-    .reclamo-card-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 14px; border-top: 1px solid var(--border); margin-top: 4px; }
+    .reclamo-card-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 14px; border-top: 1px solid var(--border); margin-top: 4px; flex-wrap: wrap; }
+    .inline-fields-row { display: flex; align-items: flex-end; gap: 14px; padding: 14px 0 2px; flex-wrap: wrap; border-top: 1px solid var(--border); margin-top: 10px; }
+    .inline-field { display: flex; flex-direction: column; gap: 4px; }
+    .inline-field label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .inline-field-wrap { display: flex; align-items: center; gap: 6px; }
+    .inline-field input[type="text"] { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Figtree', sans-serif; font-size: 14px; color: var(--text); background: #fafbfc; outline: none; transition: border-color .2s, background .2s; width: 180px; }
+    .inline-field input[type="text"]:focus { border-color: var(--navy); background: white; }
+    .inline-field input[type="text"]:disabled { background: #f1f5f9; color: var(--muted); cursor: default; border-color: var(--border); }
+    .btn-inline-save { background: var(--navy); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-family: 'Barlow Semi Condensed', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; white-space: nowrap; }
+    .btn-inline-save:hover { background: var(--accent); }
+    .btn-inline-save:disabled { opacity: .5; cursor: not-allowed; }
+    .inline-saved { font-size: 12px; color: var(--success); font-weight: 600; display: none; align-items: center; gap: 4px; }
+    .inline-saved.on { display: flex; }
 
     /* MODAL ADF */
     .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.6); display: none; align-items: center; justify-content: center; z-index: 500; padding: 20px; }
@@ -548,7 +560,7 @@
 </div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEU8CXC9pADgjb4fjNkEhS1Id_mN9_S_TvHngzLuI7xt5exOXQoxx5Kf1ivyQcxvlj/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgObxXoOe9Uo-I50Fse7M5nV4eT6QDTDm--SZQjwN08FvsUaqRApcuFPVN_XHkcd4e/exec';
 
 const MAX_FOTOS = 10;
 const MAX_MB    = 5;
@@ -895,6 +907,32 @@ function renderReclamosResp() {
       ? `<span class="adf-badge">✔ ADF completado</span>`
       : `<button class="btn-adf" data-nro="${r.nroReclamo}" data-cliente="${r.cliente.replace(/"/g,'&quot;')}" onclick="abrirADFBtn(this)">📋 Completar ADF</button>`;
 
+    // Campos OR y NC solo si está Aprobado
+    const camposORNC = r.estado === 'Aprobado' ? `
+      <div class="inline-fields-row">
+        <div class="inline-field">
+          <label>N° Orden de Retiro</label>
+          <div class="inline-field-wrap">
+            <input type="text" id="or-${r.nroReclamo}" placeholder="Nro. de orden…"
+              value="${r.nroOrdenRetiro || ''}" ${r.nroOrdenRetiro ? 'disabled' : ''}>
+          </div>
+        </div>
+        <div class="inline-field">
+          <label>N° Nota de Crédito</label>
+          <div class="inline-field-wrap">
+            <input type="text" id="nc-${r.nroReclamo}" placeholder="Nro. de nota…"
+              value="${r.nroNotaCredito || ''}" ${r.nroNotaCredito ? 'disabled' : ''}>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          ${r.nroOrdenRetiro && r.nroNotaCredito
+            ? `<span class="inline-saved on">✔ Guardado</span>`
+            : `<button class="btn-inline-save" onclick="guardarORNC('${r.nroReclamo}')">Guardar</button>`
+          }
+          <span class="inline-saved" id="saved-${r.nroReclamo}">✔ Guardado</span>
+        </div>
+      </div>` : '';
+
     return `
     <div class="reclamo-card">
       <div class="reclamo-card-head" onclick="toggleCard('${r.nroReclamo}')">
@@ -918,6 +956,7 @@ function renderReclamosResp() {
           ${r.linkVideo ? `<div class="info-item"><label>Video</label><span><a href="${r.linkVideo}" target="_blank" style="color:var(--accent)">Ver video ↗</a></span></div>` : ''}
         </div>
         ${infoResolucion}
+        ${camposORNC}
         <div class="reclamo-card-actions">${botonADF}</div>
       </div>
     </div>`;
@@ -998,7 +1037,45 @@ async function guardarADF() {
   }
 }
 
-// Cerrar modal con Escape
+// ─── ORDEN DE RETIRO / NOTA DE CRÉDITO ───────────────────────────────────────
+async function guardarORNC(nro) {
+  const orVal = document.getElementById('or-' + nro)?.value.trim();
+  const ncVal = document.getElementById('nc-' + nro)?.value.trim();
+
+  if (!orVal && !ncVal) {
+    toast('Ingresá al menos uno de los dos números.', 'err');
+    return;
+  }
+
+  loader('Guardando…');
+  try {
+    const resp = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ accion: 'ornc', nroReclamo: nro, nroOrdenRetiro: orVal, nroNotaCredito: ncVal })
+    });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error);
+
+    // Actualizar en memoria para reflejar sin recargar
+    const rec = reclamosData.find(r => r.nroReclamo === nro);
+    if (rec) { rec.nroOrdenRetiro = orVal; rec.nroNotaCredito = ncVal; }
+
+    hideLoader();
+    // Deshabilitar inputs y mostrar "Guardado"
+    const orInput = document.getElementById('or-' + nro);
+    const ncInput = document.getElementById('nc-' + nro);
+    if (orInput) orInput.disabled = true;
+    if (ncInput) ncInput.disabled = true;
+    const savedEl = document.getElementById('saved-' + nro);
+    if (savedEl) savedEl.classList.add('on');
+    // Ocultar botón guardar
+    savedEl?.previousElementSibling?.remove();
+    toast(`Datos guardados para reclamo ${nro} ✔`, 'ok');
+  } catch (err) {
+    hideLoader();
+    toast('Error al guardar: ' + err.message, 'err');
+  }
+}
 document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarADF(); });
 </script>
 </body>
